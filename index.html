@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+<head>
+<title>Our Funky HTML Page</title>
+<meta name="description" content="Our first page">
+<meta name="keywords" content="html tutorial template">
+</head>
+<body>
+Content goes here.
+</body>
+
+
+<script>
+const endpoint = 'https://api.entur.io/journey-planner/v3/graphql';
+
+const query = `{
+  board1: stopPlaces(ids: ["NSR:StopPlace:59472"]) {
+    name
+    estimatedCalls(whiteListedModes: [rail,bus,metro,tram,water], numberOfDepartures: 200, arrivalDeparture: departures, timeRange: 14400) {
+      realtime
+      serviceJourney {
+        id
+      }
+      quay {
+        publicCode
+        id
+        stopPlace {
+          parent {
+            id
+          }
+          id
+        }
+      }
+      expectedDepartureTime
+      actualDepartureTime
+      aimedDepartureTime
+      serviceJourney {
+        id
+        line {
+          id
+          publicCode
+          transportMode
+        }        
+      }
+    }
+  }
+  
+}`;
+
+const makeQuery = async () => {
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  const data = await response.json();
+  console.log(data);
+};
+
+makeQuery();
+
+
+
+</script>
+
+
+</html>
