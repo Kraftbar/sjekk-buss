@@ -33,6 +33,9 @@ const query = `{
       expectedDepartureTime
       actualDepartureTime
       aimedDepartureTime
+      destinationDisplay {
+        frontText
+      }
       serviceJourney {
         id
         line {
@@ -70,6 +73,19 @@ makeQuery()
   });
 
 console.log(queryResult);
+
+
+
+//const estimatedCalls = queryResult.data.board1[0].estimatedCalls;
+//for (let i = 0; i < estimatedCalls.length; i++) {
+//  dest=estimatedCalls[i].destinationDisplay.frontText;
+//    if (dest == "Vestli") {
+//        console.log(dest);
+//    }
+//}
+
+
+
 
 
 </script>
