@@ -1,94 +1,105 @@
 <!doctype html>
 <html>
 <head>
-<title> HTML Page</title>
-<meta name="description" content="Our first page">
-<meta name="keywords" content="html tutorial template">
+  <title>Public Transport Departures</title>
+  <meta name="description" content="Public transport departure times from a specific stop in Norway">
+  <meta name="keywords" content="public transport, departure times, Norway">
 </head>
 <body>
-Content goes here.
-</body>
+  <h1>Public Transport Departures</h1>
+  <table id="departure-table">
+    <thead>
+      <tr>
+        <th>Line</th>
+        <th>Destination</th>
+        <th>Expected Departure</th>
+        <th>Aimed Departure</th>
+        <th>Realtime</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
 
-
-<script>
-const endpoint = 'https://api.entur.io/journey-planner/v3/graphql';
-const query = `{
-  board1: stopPlaces(ids: ["NSR:StopPlace:6488"]) {
-    name
-    estimatedCalls(whiteListedModes: [rail,bus,metro,tram,water], numberOfDepartures: 200, arrivalDeparture: departures, timeRange: 14400) {
-      realtime
-      serviceJourney {
-        id
-      }
-      quay {
-        publicCode
-        id
-        stopPlace {
-          parent {
+  <script>
+    const endpoint = 'https://api.entur.io/journey-planner/v3/graphql';
+    const query = `{
+      board1: stopPlaces(ids: ["NSR:StopPlace:6488"]) {
+        name
+        estimatedCalls(whiteListedModes: [rail,bus,metro,tram,water], numberOfDepartures: 200, arrivalDeparture: departures, timeRange: 14400) {
+          realtime
+          serviceJourney {
             id
           }
-          id
+          quay {
+            publicCode
+            id
+            stopPlace {
+              parent {
+                id
+              }
+              id
+            }
+          }
+          expectedDepartureTime
+          actualDepartureTime
+          aimedDepartureTime
+          destinationDisplay {
+            frontText
+          }
+          serviceJourney {
+            id
+            line {
+              id
+              publicCode
+              transportMode
+            }
+          }
         }
       }
-      expectedDepartureTime
-      actualDepartureTime
-      aimedDepartureTime
-      destinationDisplay {
-        frontText
-      }
-      serviceJourney {
-        id
-        line {
-          id
-          publicCode
-          transportMode
-        }        
-      }
-    }
-  }
-  
-}`;
-const makeQuery = async () => {
-  const response = await fetch(endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  return await response.json();
+    }`;
 
 
-};
+    const makeQuery = async () => {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query }),
+      });
 
-let queryResult;
+      return await response.json();
+    };
+	
 
-makeQuery()
-  .then((result) => {
-    queryResult = result;
+    const updateDepartureTable = () => {
+      makeQuery()
+        .then((result) => {
+          const departures = result.data.board1[0].estimatedCalls.filter(departure => departure.destinationDisplay.frontText === "Vestli");
+          const departureTableBody = document.querySelector("#departure-table tbody");
+          departureTableBody.innerHTML = "";
 
+          departures.forEach(departure => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+              <td>${departure.serviceJourney.line.publicCode}</td>
+              <td>${departure.destinationDisplay.frontText}</td>
+              <td>${departure.expectedDepartureTime.slice(11, 16)}</td>
+              <td>${departure.aimedDepartureTime.slice(11, 16)}</td>
+              <td>${departure.realtime ? "Yes" : "No"}</td>
+            `;
+            departureTableBody.appendChild(row);
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+	
 
-    processQueryResult(queryResult) 
-  })
-  .catch((error) => {
-    console.error(error);
-  });
-
-
-function processQueryResult(queryResult) {
-    const estimatedCalls = queryResult.data.board1[0].estimatedCalls.length
-    for (let i = 0; i < estimatedCalls; i++) {
-        if ("Vestli" == queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText) {
-            console.log(queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText)
-            console.log
-            console.log(queryResult.data.board1[0].estimatedCalls[i].aimedDepartureTime)
-            console.log("")
-        }
-    }
-}
-
-</script>
-
-
+    updateDepartureTable();
+    setInterval(updateDepartureTable, 300000); // update table every 5 minutes
+  </script>
+</body>
 </html>
