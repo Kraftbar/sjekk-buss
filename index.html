@@ -68,25 +68,25 @@ makeQuery()
   .then((result) => {
     queryResult = result;
 
-// check
-const estimatedCalls = queryResult.data.board1[0].estimatedCalls.length
-for (let i = 0; i < estimatedCalls; i++) {
-if ("Vestli" == queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText){
-	console.log(queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText)
-	console.log  
-	console.log(queryResult.data.board1[0].estimatedCalls[i].aimedDepartureTime)
-	console.log("")
-}
-}
 
-
+    processQueryResult(queryResult) 
   })
   .catch((error) => {
     console.error(error);
   });
 
 
-
+function processQueryResult(queryResult) {
+    const estimatedCalls = queryResult.data.board1[0].estimatedCalls.length
+    for (let i = 0; i < estimatedCalls; i++) {
+        if ("Vestli" == queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText) {
+            console.log(queryResult.data.board1[0].estimatedCalls[i].destinationDisplay.frontText)
+            console.log
+            console.log(queryResult.data.board1[0].estimatedCalls[i].aimedDepartureTime)
+            console.log("")
+        }
+    }
+}
 
 </script>
 
